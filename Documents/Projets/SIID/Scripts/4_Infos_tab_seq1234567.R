@@ -106,11 +106,12 @@ write.csv(samples_analysis2,file="Infos_samples_reseq_bichat.csv")
 ################################### Bichat + pitié: Create a common metadata table from the metadata table from pitié ##############
 #### import metadata and nexclade output for pitié data
 setwd("~/Projets/SIID/data")
-metadata_p<-read_xlsx("Metadata_pitie.xlsx", sheet = "Metadata")
+metadata_p<-read_xlsx("Metadata_PSL_Ct rectifié.xlsx")
 metadata_p$Dossier<-paste("fastq_total_",metadata_p$Dossier,sep="")
 setwd("~/Projets/SIID/2_Filter_trim/Accurate/")
 nextclade_p<-read.csv("nextclade_pitie.csv",sep=";")
 metadata_p$Variant<-nextclade_p$clade_nextstrain[match(metadata_p$Dossier,nextclade_p$seqName)]
+metadata_p<-metadata_p[,1:8]
 
 pitie_abs<-nextclade_p[which((nextclade_p$seqName%in%metadata_p$Dossier)==F),]
 
@@ -137,6 +138,23 @@ metadata_b_format$Origin<-"Bichat"
 metadata_p$Origin<-"Pitie"
 
 metadata_new<-rbind(metadata_b_format,metadata_p)
+
+##### New column for immunodepression 
+metadata_new$Immunodepression<-NA
+metadata_new$Immunodepression[which(metadata_new$Categorie_ID=="HEMATO")]<-"Hemato_Oncology"
+metadata_new$Immunodepression[which(metadata_new$Categorie_ID=="HEPATO-GREFFE")]<-"Liver_transplantation"
+metadata_new$Immunodepression[which(metadata_new$Categorie_ID=="MED. INT.")]<-"Autoimmune_or_inflamatory_diseases"
+metadata_new$Immunodepression[which(metadata_new$Categorie_ID=="ONCO")]<-"Oncology"
+metadata_new$Immunodepression[which(metadata_new$Categorie_ID=="Pneumo")]<-"Pneumology"
+metadata_new$Immunodepression[which(metadata_new$Categorie_ID=="RHUMATO")]<-"Autoimmune_or_inflamatory_diseases"
+metadata_new$Immunodepression[which(metadata_new$Categorie_ID=="RITUX")]<-"RITUXIMAB"
+metadata_new$Immunodepression[which(metadata_new$Categorie_ID=="TRANSPL. CARD.")]<-"Heart_transplantation"
+metadata_new$Immunodepression[which(metadata_new$Categorie_ID=="TRANSPL. CARD.VIH")]<-"Heart_transplantation"
+metadata_new$Immunodepression[which(metadata_new$Categorie_ID=="TRANSPL. REIN")]<-"Kidney_transplantation"
+metadata_new$Immunodepression[which(metadata_new$Categorie_ID=="TRANSPL. REIN / VIH")]<-"Kidney_transplantation"
+metadata_new$Immunodepression[which(metadata_new$Categorie_ID=="VIH")]<-"HIV_infection"
+metadata_new$Immunodepression[which(is.na(metadata_new$Categorie_ID) & metadata_new$Categorie=="patient_J0")]<-"Autoimmune_or_inflamatory_diseases"
+
 
 #### write the full metadata table
 setwd("~/Projets/SIID/data")
